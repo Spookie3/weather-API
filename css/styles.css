@@ -1,0 +1,42 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+/* navigation */
+nav {
+    display: flex;
+    flex-direction: row;
+    width: 100vw;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.nav-container {
+    display: flex;
+    width: 100%;
+    margin: 2rem;
+}
+
+#menu {
+
+}
+
+#tempToggle-btn {
+    flex-direction: row-reverse;
+}
+
+.pointer {
+    cursor: pointer;
+}
+
+/* sections */
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 5rem;
+}
