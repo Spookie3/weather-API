@@ -1,0 +1,39 @@
+#scrollBar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80vw;
+    height: 10rem;
+    overflow-x: scroll;
+    
+}
+
+#scrollBar::-webkit-scrollbar {
+  height: 0.5rem;
+}
+
+/* Handle */
+#scrollBar::-webkit-scrollbar-thumb {
+  background: #888; 
+  border-radius: 1rem;
+}
+
+/* Handle on hover */
+#scrollBar::-webkit-scrollbar-thumb:hover {
+  background: #555; 
+}
+
+#hourlyForecast {
+    display: grid;
+    grid-template-columns: repeat(24, 1fr);
+    column-gap: 2rem;
+    width: 100%;
+}
+
+.forecast-card {
+    text-align: center;
+    background-color: grey;
+    padding: 1rem 2rem 1rem 2rem;
+    border-radius: 1rem;
+    cursor: pointer;
+}
