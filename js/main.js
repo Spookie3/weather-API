@@ -1,3 +1,5 @@
+import { getHourlyForecastData } from "./hourlyForecast.js";
+
 document.addEventListener("DOMContentLoaded", function () {
 
     const daysList = document.getElementById("days-list");
@@ -12,7 +14,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const fahrenheitBtn = document.getElementById("fahrenheitBtn");
 
     let currentUnit = "C";
+    let unitType = "metric";
     let activeIndex = 0;
+
+    localStorage.setItem("day", 0);
+    let selectedDay = localStorage.getItem("day") * 24;
 
     const weekDays = ["Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag", "Söndag"];
     const fakeWeather = [];
@@ -88,6 +94,9 @@ document.addEventListener("DOMContentLoaded", function () {
         celsiusBtn.classList.add("active");
         fahrenheitBtn.classList.remove("active");
         showWeather(activeIndex);
+        let unitType = "metric";
+        localStorage.setItem("currentUnit", "C");
+        getHourlyForecastData(59.609901, 16.544809, "80948121ac889b120dca64a6c7e5f24c", unitType, selectedDay);
     });
 
     fahrenheitBtn.addEventListener("click", function () {
@@ -95,9 +104,13 @@ document.addEventListener("DOMContentLoaded", function () {
         fahrenheitBtn.classList.add("active");
         celsiusBtn.classList.remove("active");
         showWeather(activeIndex);
+        let unitType = "imperial";
+        localStorage.setItem("currentUnit", "F");
+        getHourlyForecastData(59.609901, 16.544809, "80948121ac889b120dca64a6c7e5f24c", unitType, selectedDay);
     });
 
     generateTenDaysFromMonday();
     renderDays();
     showWeather(0);
+    getHourlyForecastData(59.609901, 16.544809, "80948121ac889b120dca64a6c7e5f24c", unitType, selectedDay)
 });
