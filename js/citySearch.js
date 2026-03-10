@@ -35,7 +35,7 @@ async function fetchCoordinates(cityName){
     fetchWeather(lat, lon);
 }
 
-function saveCity(cityName, lat, lon){
+export function saveCity(cityName, lat, lon){
     if(!cities.find((cityObj) => cityObj.name === cityName)){
         cities.push({"name": cityName, "lat": lat, "lon": lon});
     }
