@@ -31,13 +31,13 @@ async function fetchCoordinates(cityName){
     })
 );
 
-    saveCity(cityName);
+    saveCity(cityName, lat, lon);
     fetchWeather(lat, lon);
 }
 
-function saveCity(cityName){
-    if(!cities.includes(cityName)){
-        cities.push(cityName);
+function saveCity(cityName, lat, lon){
+    if(!cities.find((cityObj) => cityObj.name === cityName)){
+        cities.push({"name": cityName, "lat": lat, "lon": lon});
     }
 
     localStorage.setItem("cities", JSON.stringify(cities));
