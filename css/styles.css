@@ -36,6 +36,20 @@ nav {
     transition: .3s ease-in-out;
 }
 
+.cities {
+    display: flex;
+    flex-direction: column;
+}
+
+.cities h3 {
+    margin-bottom: 0.5rem;
+}
+
+.city {
+    margin: .25rem;
+    padding: .25rem;
+}
+
 #tempToggle-btn {
     flex-direction: row-reverse;
     z-index: 2;
