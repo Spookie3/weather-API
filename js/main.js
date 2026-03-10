@@ -1,4 +1,4 @@
-import { openSearchModal, fetchWeather } from "./citySearch.js";
+import { openSearchModal, fetchWeather, saveCity } from "./citySearch.js";
 import { getHourlyForecastData } from "./hourlyForecast.js";
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -31,9 +31,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const popularCitiesArr = [
         {"name": "London", "lon": 0, "lat": 0},
         {"name": "Paris", "lon": 0, "lat": 0},
-        {"name": "Stockholm", "lon": 0, "lat": 0}
+        {"name": "Stockholm", "lon": 18.0686, "lat": 59.3293}
     ];
     localStorage.setItem("popCityString", JSON.stringify(popularCitiesArr));
+    let cities = JSON.parse(localStorage.getItem("cities")) || [];
 
     function generateTenDaysFromMonday() {
         const today = new Date();
@@ -103,7 +104,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     //Renders all cities in a specific div based on the provided array and element ID
     function renderCityList(cityString, divId) {
-        //let cityArr = JSON.parse(cityString);
+        divId.innerHTML = `
+        <h3>Previously Viewed:</h3>
+        `;
         for(let i = 0; i < cityString.length; i++){
             divId.innerHTML += `
                 <span class="city">${cityString[i].name}</span>               
@@ -121,7 +124,7 @@ document.addEventListener("DOMContentLoaded", function () {
             storageKey = "popCityString";
         }
         if (e.target.closest("#prevCitiesList")){
-            storageKey = "prevCityString";
+            storageKey = "cities";
         }
         if (!storageKey) return;
 
@@ -129,7 +132,9 @@ document.addEventListener("DOMContentLoaded", function () {
         const clickedCity = cityArr.find((cityObj) => cityObj.name === cityValue);
         
         if(clickedCity) {
-            localStorage.setItem("weatherCity", JSON.stringify(clickedCity));  
+            localStorage.setItem("weatherCity", JSON.stringify(clickedCity));
+            //update all render functions relying on weatherCity  
+            renderAll();
         }
     });
 
@@ -140,7 +145,7 @@ document.addEventListener("DOMContentLoaded", function () {
         showWeather(activeIndex);
         unitType = "metric";
         localStorage.setItem("currentUnit", "C");
-        getHourlyForecastData(59.609901, 16.544809, "80948121ac889b120dca64a6c7e5f24c", unitType, selectedDay);
+        renderAll();
     });
 
     fahrenheitBtn.addEventListener("click", function () {
@@ -150,7 +155,7 @@ document.addEventListener("DOMContentLoaded", function () {
         showWeather(activeIndex);
         unitType = "imperial";
         localStorage.setItem("currentUnit", "F");
-        getHourlyForecastData(59.609901, 16.544809, "80948121ac889b120dca64a6c7e5f24c", unitType, selectedDay);
+        renderAll();
     });
 
     menuBtn.addEventListener("click", function () {
@@ -164,11 +169,18 @@ document.addEventListener("DOMContentLoaded", function () {
         
     });
 
+    function renderAll() {
+        let currentLocation = JSON.parse(localStorage.getItem("weatherCity")) || [];
+        getHourlyForecastData(currentLocation.lat, currentLocation.lon, "80948121ac889b120dca64a6c7e5f24c", unitType, selectedDay);
+        renderCityList(cities, prevHistory);
+        fetchWeather(currentLocation.lat, currentLocation.lon);
+    }
+
     generateTenDaysFromMonday();
     renderDays();
     showWeather(0);
-    getHourlyForecastData(59.609901, 16.544809, "80948121ac889b120dca64a6c7e5f24c", unitType, selectedDay);
-    renderCityList(popularCitiesArr, prevHistory);
+    getHourlyForecastData(0, 0, "80948121ac889b120dca64a6c7e5f24c", unitType, selectedDay);
+    renderCityList(cities, prevHistory);
 
     const savedCity = JSON.parse(localStorage.getItem("weatherCity"));
 
@@ -176,46 +188,50 @@ document.addEventListener("DOMContentLoaded", function () {
              document.getElementById("city").textContent = savedCity.name;
             fetchWeather(savedCity.lat, savedCity.lon);
 }
-});
 
-//selectCity section
+    //selectCity section
 
-const city = document.getElementById("city");
-const locationOn = document.getElementById("location-on");
+    const city = document.getElementById("city");
+    const locationOn = document.getElementById("location-on");
 
-city.addEventListener("click", openSearchModal);
+    city.addEventListener("click", openSearchModal);
 
-const mapContainer = document.getElementById("map-container");
+    const mapContainer = document.getElementById("map-container");
 
-let map;
+    let map;
 
-locationOn.addEventListener("click", () => {
+    locationOn.addEventListener("click", () => {
 
-    mapContainer.style.display = "block";
+        mapContainer.style.display = "block";
 
-    if(!map){
+        if(!map){
 
-        map = L.map('map').setView([51.505, -0.09], 5);
+            map = L.map('map').setView([51.505, -0.09], 5);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap'
-        }).addTo(map);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
 
-        map.on("click", function(e){
+            map.on("click", function(e){
 
-            const lat = e.latlng.lat;
-            const lon = e.latlng.lng;
+                const lat = e.latlng.lat;
+                const lon = e.latlng.lng;
 
                 localStorage.setItem(
-        "weatherCity",
-        JSON.stringify({
-            name: "Selected location",
-            lat: lat,
-            lon: lon
-        })
-    );
-            fetchWeather(lat, lon);
-            mapContainer.style.display = "none";
-        });
-    }
+                    "weatherCity",
+                    JSON.stringify({
+                        name: "Selected location", //Invalid City name
+                        lat: lat,
+                        lon: lon
+                    })
+                );
+                saveCity("new City", lat, lon);
+                //fetchWeather(lat, lon);
+                renderAll();
+                mapContainer.style.display = "none";
+            });
+        }
+    });
+
 });
+
