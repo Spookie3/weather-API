@@ -114,6 +114,13 @@ document.addEventListener("DOMContentLoaded", function () {
     renderDays();
     showWeather(0);
     getHourlyForecastData(59.609901, 16.544809, "80948121ac889b120dca64a6c7e5f24c", unitType, selectedDay)
+
+    const savedCity = JSON.parse(localStorage.getItem("weatherCity"));
+
+        if(savedCity){
+             document.getElementById("city").textContent = savedCity.name;
+            fetchWeather(savedCity.lat, savedCity.lon);
+}
 });
 
 //selectCity section
@@ -144,10 +151,15 @@ locationOn.addEventListener("click", () => {
             const lat = e.latlng.lat;
             const lon = e.latlng.lng;
 
-            console.log(lat, lon);
-
+                localStorage.setItem(
+        "weatherCity",
+        JSON.stringify({
+            name: "Selected location",
+            lat: lat,
+            lon: lon
+        })
+    );
             fetchWeather(lat, lon);
-
             mapContainer.style.display = "none";
         });
     }

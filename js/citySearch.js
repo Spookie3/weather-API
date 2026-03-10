@@ -24,6 +24,13 @@ async function fetchCoordinates(cityName){
     const lat = data[0].lat;
     const lon = data[0].lon;
 
+    localStorage.setItem("weatherCity", JSON.stringify({
+        name: cityName,
+        lat: lat,
+        lon: lon
+    })
+);
+
     saveCity(cityName);
     fetchWeather(lat, lon);
 }
