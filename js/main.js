@@ -9,8 +9,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const precipitationEl = document.getElementById("precipitation");
     const selectedDayEl = document.getElementById("selected-day");
     const weatherIconEl = document.getElementById("weather-icon");
-    const prevHistory = document.getElementById("prevHistory");
-    const city = document.getElementsByClassName("city");
+    const prevHistory = document.querySelector("#prevCitiesList");
+    const popCitiesList = document.querySelector("#popCitiesList");
 
     const celsiusBtn = document.getElementById("celsiusBtn");
     const fahrenheitBtn = document.getElementById("fahrenheitBtn");
@@ -27,11 +27,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const weekDays = ["Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag", "Söndag"];
     const fakeWeather = [];
-    const popularCities = [
-        {"city": "London", "lon": 0, "lat": 0},
-        {"city": "Paris", "lon": 0, "lat": 0},
-        {"city": "Stockholm", "lon": 0, "lat": 0}
+    const popularCitiesArr = [
+        {"name": "London", "lon": 0, "lat": 0},
+        {"name": "Paris", "lon": 0, "lat": 0},
+        {"name": "Stockholm", "lon": 0, "lat": 0}
     ];
+    localStorage.setItem("popCityString", JSON.stringify(popularCitiesArr));
 
     function generateTenDaysFromMonday() {
         const today = new Date();
@@ -101,24 +102,35 @@ document.addEventListener("DOMContentLoaded", function () {
 
     //Renders all cities in a specific div based on the provided array and element ID
     function renderCityList(cityString, divId) {
-        let cityArr = JSON.parse(cityString);
-        for(let i = 0; i < cityArr.length; i++){
+        //let cityArr = JSON.parse(cityString);
+        for(let i = 0; i < cityString.length; i++){
             divId.innerHTML += `
-                <span class="city">${cityArr[i].city}</span>               
+                <span class="city">${cityString[i].name}</span>               
             `;
         }
     }
 
     //Updates the current city selected in local storage.
-    city.addEventListener("click", function (e) {
-            let cityString = localStorage.getItem("cityString");
-            let cityArr = JSON.parse(cityString);
-            const cityValue = e.target.textContent;
-            const clickedCity = cityArr.find((cityName) => {
-                return cityName.includes(cityValue);
-            });
-            localStorage.setItem("currentCityString", JSON.stringify(clickedCity));
-        });
+    menuList.addEventListener("click", function (e) {
+        if (!e.target.classList.contains("city")) return;
+        const cityValue = e.target.textContent;
+        let storageKey = null;
+
+        if (e.target.closest("#popCitiesList")){
+            storageKey = "popCityString";
+        }
+        if (e.target.closest("#prevCitiesList")){
+            storageKey = "prevCityString";
+        }
+        if (!storageKey) return;
+
+        let cityArr = JSON.parse(localStorage.getItem(storageKey)) || [];
+        const clickedCity = cityArr.find((cityObj) => cityObj.name === cityValue);
+        
+        if(clickedCity) {
+            localStorage.setItem("weatherCity", JSON.stringify(clickedCity));  
+        }
+    });
 
     celsiusBtn.addEventListener("click", function () {
         currentUnit = "C";
@@ -155,5 +167,5 @@ document.addEventListener("DOMContentLoaded", function () {
     renderDays();
     showWeather(0);
     getHourlyForecastData(59.609901, 16.544809, "80948121ac889b120dca64a6c7e5f24c", unitType, selectedDay);
-    renderCityList(popularCities, prevHistory);
+    renderCityList(popularCitiesArr, prevHistory);
 });
