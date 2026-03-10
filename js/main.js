@@ -1,3 +1,4 @@
+import { openSearchModal, fetchWeather } from "./citySearch.js";
 import { getHourlyForecastData } from "./hourlyForecast.js";
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -168,4 +169,53 @@ document.addEventListener("DOMContentLoaded", function () {
     showWeather(0);
     getHourlyForecastData(59.609901, 16.544809, "80948121ac889b120dca64a6c7e5f24c", unitType, selectedDay);
     renderCityList(popularCitiesArr, prevHistory);
+
+    const savedCity = JSON.parse(localStorage.getItem("weatherCity"));
+
+        if(savedCity){
+             document.getElementById("city").textContent = savedCity.name;
+            fetchWeather(savedCity.lat, savedCity.lon);
+}
+});
+
+//selectCity section
+
+const city = document.getElementById("city");
+const locationOn = document.getElementById("location-on");
+
+city.addEventListener("click", openSearchModal);
+
+const mapContainer = document.getElementById("map-container");
+
+let map;
+
+locationOn.addEventListener("click", () => {
+
+    mapContainer.style.display = "block";
+
+    if(!map){
+
+        map = L.map('map').setView([51.505, -0.09], 5);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        map.on("click", function(e){
+
+            const lat = e.latlng.lat;
+            const lon = e.latlng.lng;
+
+                localStorage.setItem(
+        "weatherCity",
+        JSON.stringify({
+            name: "Selected location",
+            lat: lat,
+            lon: lon
+        })
+    );
+            fetchWeather(lat, lon);
+            mapContainer.style.display = "none";
+        });
+    }
 });
