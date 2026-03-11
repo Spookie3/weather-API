@@ -23,8 +23,6 @@ document.addEventListener("DOMContentLoaded", function () {
     let activeIndex = 0;
     let toggle = 0;
 
-    localStorage.setItem("day", 0);
-    let selectedDay = localStorage.getItem("day") * 24;
     let currentLocation = JSON.parse(localStorage.getItem("weatherCity")) || [];
 
     const weekDays = ["Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag", "Söndag"];
@@ -270,7 +268,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function renderAll() {
         currentLocation = JSON.parse(localStorage.getItem("weatherCity")) || [];
         cities = JSON.parse(localStorage.getItem("cities")) || [];
-        getHourlyForecastData(currentLocation.lat, currentLocation.lon, "80948121ac889b120dca64a6c7e5f24c", unitType, selectedDay);
+        getHourlyForecastData(currentLocation.lat, currentLocation.lon, "80948121ac889b120dca64a6c7e5f24c", unitType);
         renderCityList(cities, prevHistory);
         fetchWeather(currentLocation.lat, currentLocation.lon);
         showWeather(activeIndex);
@@ -279,7 +277,7 @@ document.addEventListener("DOMContentLoaded", function () {
     generateTenDaysFromMonday();
     renderDays();
     showWeather(0);
-    getHourlyForecastData(currentLocation.lat, currentLocation.lon, "80948121ac889b120dca64a6c7e5f24c", unitType, selectedDay);
+    getHourlyForecastData(currentLocation.lat, currentLocation.lon, "80948121ac889b120dca64a6c7e5f24c", unitType);
     renderCityList(cities, prevHistory);
 
     const savedCity = JSON.parse(localStorage.getItem("weatherCity"));

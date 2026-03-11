@@ -1,4 +1,4 @@
-export async function getHourlyForecastData(lat, lon, API_key, tempSelector, selectedDay) {
+export async function getHourlyForecastData(lat, lon, API_key, tempSelector) {
     let forecast_API = `https://pro.openweathermap.org/data/2.5/forecast/hourly?lat=${lat}&lon=${lon}&appid=${API_key}&units=${tempSelector}`;
     let hourlyCards = document.getElementById("hourlyForecast");
     let tempUnit = localStorage.getItem("currentUnit");
@@ -9,9 +9,10 @@ export async function getHourlyForecastData(lat, lon, API_key, tempSelector, sel
         }
         const weatherData = await response.json();
         const hourlyData = weatherData.list;
+        const timeZone = weatherData.city.timezone;
         hourlyCards.innerHTML = "";
-        for(let i=0+selectedDay; i < 24+selectedDay; i++) {
-            let unixTimeConvert = new Date(hourlyData[i].dt * 1000);
+        for(let i=0; i < 24; i++) {
+            let unixTimeConvert = new Date((hourlyData[i].dt + timeZone) * 1000);
             let timeH = unixTimeConvert.getUTCHours().toString().padStart(2,0);
             let timeM = unixTimeConvert.getUTCMinutes().toString().padStart(2,0);
             let roundTemp = Math.floor(hourlyData[i].main.temp);
