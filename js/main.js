@@ -272,7 +272,7 @@ document.addEventListener("DOMContentLoaded", function () {
         cities = JSON.parse(localStorage.getItem("cities")) || [];
         getHourlyForecastData(currentLocation.lat, currentLocation.lon, "80948121ac889b120dca64a6c7e5f24c", unitType, selectedDay);
         renderCityList(cities, prevHistory);
-        fetchWeather(currentLocation.lat, currentLocation.lon);
+        fetchWeather(currentLocation.lat, currentLocation.lon, unitType);
         showWeather(activeIndex);
     }
   
@@ -288,7 +288,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         document.getElementById("city").textContent = savedCity.name;
 
-        fetchWeather(savedCity.lat, savedCity.lon);
+        fetchWeather(savedCity.lat, savedCity.lon, unitType);
 
         loadDailyWeather(savedCity.lat, savedCity.lon);
 

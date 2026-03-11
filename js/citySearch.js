@@ -32,7 +32,7 @@ async function fetchCoordinates(cityName){
 );
 
     saveCity(cityName, lat, lon);
-    fetchWeather(lat, lon);
+    fetchWeather(lat, lon, unitType);
 }
 
 export function saveCity(cityName, lat, lon){
@@ -42,22 +42,24 @@ export function saveCity(cityName, lat, lon){
     }
 }
 
-export async function fetchWeather(lat, lon){
+export async function fetchWeather(lat, lon, unitType){
 
     const API_KEY = "d7d5e9ce027464d47b22372e72cc2b23";
-    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`; //missing code for changing units
+    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=${unitType}&appid=${API_KEY}`; //missing code for changing units
     const response = await fetch(url);
     const data = await response.json();
 
-    updateUI(data);
+    updateUI(data, unitType);
 }
 
-function updateUI(data){
+function updateUI(data, unitType){
 
     const cityElement = document.getElementById("city");
     const tempElement = document.getElementById("current-temp");
 
     cityElement.textContent = data.name;
 
-    tempElement.textContent = Math.round(data.main.temp) + "°C";
+    const unit = unitType === "metric" ? "°C" : "°F";
+
+    tempElement.textContent = Math.round(data.main.temp) + unit;
 }
