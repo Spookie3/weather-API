@@ -25,6 +25,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     localStorage.setItem("day", 0);
     let selectedDay = localStorage.getItem("day") * 24;
+    let currentLocation = JSON.parse(localStorage.getItem("weatherCity")) || [];
 
     const weekDays = ["Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag", "Söndag"];
     const fakeWeather = [];
@@ -104,9 +105,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     //Renders all cities in a specific div based on the provided array and element ID
     function renderCityList(cityString, divId) {
-        divId.innerHTML = `
-        <h3>Previously Viewed:</h3>
-        `;
+        divId.innerHTML = "";
         for(let i = 0; i < cityString.length; i++){
             divId.innerHTML += `
                 <span class="city">${cityString[i].name}</span>               
@@ -140,20 +139,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
     celsiusBtn.addEventListener("click", function () {
         currentUnit = "C";
+        unitType = "metric";
         celsiusBtn.classList.add("active");
         fahrenheitBtn.classList.remove("active");
-        showWeather(activeIndex);
-        unitType = "metric";
         localStorage.setItem("currentUnit", "C");
         renderAll();
     });
 
     fahrenheitBtn.addEventListener("click", function () {
         currentUnit = "F";
+        unitType = "imperial";
         fahrenheitBtn.classList.add("active");
         celsiusBtn.classList.remove("active");
-        showWeather(activeIndex);
-        unitType = "imperial";
         localStorage.setItem("currentUnit", "F");
         renderAll();
     });
@@ -170,16 +167,18 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     function renderAll() {
-        let currentLocation = JSON.parse(localStorage.getItem("weatherCity")) || [];
+        currentLocation = JSON.parse(localStorage.getItem("weatherCity")) || [];
+        cities = JSON.parse(localStorage.getItem("cities")) || [];
         getHourlyForecastData(currentLocation.lat, currentLocation.lon, "80948121ac889b120dca64a6c7e5f24c", unitType, selectedDay);
         renderCityList(cities, prevHistory);
         fetchWeather(currentLocation.lat, currentLocation.lon);
+        showWeather(activeIndex);
     }
 
     generateTenDaysFromMonday();
     renderDays();
     showWeather(0);
-    getHourlyForecastData(0, 0, "80948121ac889b120dca64a6c7e5f24c", unitType, selectedDay);
+    getHourlyForecastData(currentLocation.lat, currentLocation.lon, "80948121ac889b120dca64a6c7e5f24c", unitType, selectedDay);
     renderCityList(cities, prevHistory);
 
     const savedCity = JSON.parse(localStorage.getItem("weatherCity"));
@@ -194,7 +193,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const city = document.getElementById("city");
     const locationOn = document.getElementById("location-on");
 
-    city.addEventListener("click", openSearchModal);
+    city.addEventListener("click", () => {
+        openSearchModal();
+        renderAll(); //trying to render all features again after a city has been selected
+    });
 
     const mapContainer = document.getElementById("map-container");
 
@@ -220,13 +222,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 localStorage.setItem(
                     "weatherCity",
                     JSON.stringify({
-                        name: "Selected location", //Invalid City name
+                        name: "Selected location", //Invalid City name, needs to be the actual city name for it to used by others
                         lat: lat,
                         lon: lon
                     })
                 );
                 saveCity("new City", lat, lon);
-                //fetchWeather(lat, lon);
+                //fetchWeather(lat, lon); removed and replaced by an all function for rendering
                 renderAll();
                 mapContainer.style.display = "none";
             });
