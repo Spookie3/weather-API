@@ -294,9 +294,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     }
 
-});
-
-// ===== CITY SELECT =====
+    // ===== CITY SELECT =====
 
     const city = document.getElementById("city");
     const locationOn = document.getElementById("location-on");
@@ -343,6 +341,5 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         }
     });
-
 });
 
