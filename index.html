@@ -14,9 +14,22 @@
 <body>
     <nav>
         <div id="menu" class="nav-container">
-            <svg class="pointer" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#1f1f1f">
+            <svg id="menuIcon" class="pointer" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#1f1f1f">
                 <path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z"/>
             </svg>
+            <div id="menuList" class="menu activeMenu">
+                <h3>Popular Locations:</h3>
+                <div id="popCitiesList" class="cities">
+                        <span class="city">London</span>
+                        <span class="city">Paris</span>
+                        <span class="city">Stockholm</span>
+                </div>
+                <div class="line"></div>
+                <h3>Previously Viewed:</h3>
+                <div id="prevCitiesList" class="cities">
+                        
+                </div>
+            </div>
         </div>
 
         <div id="tempToggle-btn" class="nav-container">
