@@ -297,8 +297,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const city = document.getElementById("city");
     const locationOn = document.getElementById("location-on");
 
-    city.addEventListener("click", () => {
-        openSearchModal();
+    city.addEventListener("click", async() => {     //to prevent renderall() to act first
+        await openSearchModal();
         renderAll(); //trying to render all features again after a city has been selected
     });
 
