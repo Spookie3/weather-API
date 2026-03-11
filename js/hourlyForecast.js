@@ -9,9 +9,10 @@ export async function getHourlyForecastData(lat, lon, API_key, tempSelector) {
         }
         const weatherData = await response.json();
         const hourlyData = weatherData.list;
+        const timeZone = weatherData.city.timezone;
         hourlyCards.innerHTML = "";
         for(let i=0; i < 24; i++) {
-            let unixTimeConvert = new Date(hourlyData[i].dt * 1000);
+            let unixTimeConvert = new Date((hourlyData[i].dt + timeZone) * 1000);
             let timeH = unixTimeConvert.getUTCHours().toString().padStart(2,0);
             let timeM = unixTimeConvert.getUTCMinutes().toString().padStart(2,0);
             let roundTemp = Math.floor(hourlyData[i].main.temp);
