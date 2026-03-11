@@ -2,12 +2,12 @@ const cityElement = document.getElementById("city");
 
 let cities = JSON.parse(localStorage.getItem("cities")) || [];
 
-export function openSearchModal(){
+export async function openSearchModal(){
     const cityName = prompt("Enter city name");
 
     if(!cityName) return;
 
-    fetchCoordinates(cityName);
+    await fetchCoordinates(cityName);
 }
 
 async function fetchCoordinates(cityName){
@@ -32,7 +32,8 @@ async function fetchCoordinates(cityName){
 );
 
     saveCity(cityName, lat, lon);
-    fetchWeather(lat, lon, unitType);
+    return {lat, lon};
+    //fetchWeather(lat, lon, unitType);
 }
 
 export function saveCity(cityName, lat, lon){
