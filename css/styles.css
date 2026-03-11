@@ -7,7 +7,7 @@ nav {
     display: flex;
     flex-direction: row;
     width: 100vw;
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
 }
@@ -17,12 +17,68 @@ nav {
     margin: 2rem;
 }
 
+.activeMenu {
+    display: flex !important;
+    transform: translateX(60vw);
+}
+
+.menu {
+   /* display: none;*/
+    flex-direction: column;
+    max-width: 50vw;
+    height: 80%;
+    padding: 6rem 2rem;
+    background-color: #9ac7f4;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: -60vw;
+    transition: .3s ease-in-out;
+}
+
+.cities {
+    display: flex;
+    flex-direction: column;
+}
+
+#menuList h3 {
+    margin-bottom: 0.5rem;
+}
+
+.city {
+    margin: .25rem;
+    padding: .25rem;
+}
+
+#prevCitiesList {
+    height: 100%;
+    overflow-y: scroll;
+}
+#prevCitiesList::-webkit-scrollbar{
+    width: 0.5rem;
+}
+#prevCitiesList::-webkit-scrollbar-thumb {
+  background: #888; 
+  border-radius: 1rem;
+}
+
+
 #tempToggle-btn {
     flex-direction: row-reverse;
+    z-index: 2;
 }
 .pointer {
     cursor: pointer;
+    z-index: 2;
 }
+
+.line {
+    margin: 1rem 0;
+    width: 100%;
+    height: .1rem;
+    background-color: #666;
+}
+
 /* sections */
 .container {
     display: flex;

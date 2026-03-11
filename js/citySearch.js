@@ -31,22 +31,21 @@ async function fetchCoordinates(cityName){
     })
 );
 
-    saveCity(cityName);
+    saveCity(cityName, lat, lon);
     fetchWeather(lat, lon);
 }
 
-function saveCity(cityName){
-    if(!cities.includes(cityName)){
-        cities.push(cityName);
+export function saveCity(cityName, lat, lon){
+    if(!cities.find((cityObj) => cityObj.name === cityName)){
+        cities.push({"name": cityName, "lat": lat, "lon": lon});
+        localStorage.setItem("cities", JSON.stringify(cities));
     }
-
-    localStorage.setItem("cities", JSON.stringify(cities));
 }
 
 export async function fetchWeather(lat, lon){
 
     const API_KEY = "d7d5e9ce027464d47b22372e72cc2b23";
-    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`;
+    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`; //missing code for changing units
     const response = await fetch(url);
     const data = await response.json();
 

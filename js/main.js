@@ -1,4 +1,4 @@
-import { openSearchModal, fetchWeather } from "./citySearch.js";
+import { openSearchModal, fetchWeather, saveCity } from "./citySearch.js";
 import { getHourlyForecastData } from "./hourlyForecast.js";
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -10,19 +10,32 @@ document.addEventListener("DOMContentLoaded", function () {
     const precipitationEl = document.getElementById("precipitation");
     const selectedDayEl = document.getElementById("selected-day");
     const weatherIconEl = document.getElementById("weather-icon");
+    const prevHistory = document.querySelector("#prevCitiesList");
+    const popCitiesList = document.querySelector("#popCitiesList");
 
     const celsiusBtn = document.getElementById("celsiusBtn");
     const fahrenheitBtn = document.getElementById("fahrenheitBtn");
+    const menuBtn = document.getElementById("menuIcon");
+    const menuList = document.getElementById("menuList");
 
     let currentUnit = "C";
     let unitType = "metric";
     let activeIndex = 0;
+    let toggle = 0;
 
     localStorage.setItem("day", 0);
     let selectedDay = localStorage.getItem("day") * 24;
+    let currentLocation = JSON.parse(localStorage.getItem("weatherCity")) || [];
 
     const weekDays = ["Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag", "Söndag"];
     const fakeWeather = [];
+    const popularCitiesArr = [
+        {"name": "London", "lon": 0, "lat": 0},
+        {"name": "Paris", "lon": 0, "lat": 0},
+        {"name": "Stockholm", "lon": 18.0686, "lat": 59.3293}
+    ];
+    localStorage.setItem("popCityString", JSON.stringify(popularCitiesArr));
+    let cities = JSON.parse(localStorage.getItem("cities")) || [];
 
     function generateTenDaysFromMonday() {
         const today = new Date();
@@ -90,30 +103,83 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    //Renders all cities in a specific div based on the provided array and element ID
+    function renderCityList(cityString, divId) {
+        divId.innerHTML = "";
+        for(let i = 0; i < cityString.length; i++){
+            divId.innerHTML += `
+                <span class="city">${cityString[i].name}</span>               
+            `;
+        }
+    }
+
+    //Updates the current city selected in local storage.
+    menuList.addEventListener("click", function (e) {
+        if (!e.target.classList.contains("city")) return;
+        const cityValue = e.target.textContent;
+        let storageKey = null;
+
+        if (e.target.closest("#popCitiesList")){
+            storageKey = "popCityString";
+        }
+        if (e.target.closest("#prevCitiesList")){
+            storageKey = "cities";
+        }
+        if (!storageKey) return;
+
+        let cityArr = JSON.parse(localStorage.getItem(storageKey)) || [];
+        const clickedCity = cityArr.find((cityObj) => cityObj.name === cityValue);
+        
+        if(clickedCity) {
+            localStorage.setItem("weatherCity", JSON.stringify(clickedCity));
+            //update all render functions relying on weatherCity  
+            renderAll();
+        }
+    });
+
     celsiusBtn.addEventListener("click", function () {
         currentUnit = "C";
+        unitType = "metric";
         celsiusBtn.classList.add("active");
         fahrenheitBtn.classList.remove("active");
-        showWeather(activeIndex);
-        let unitType = "metric";
         localStorage.setItem("currentUnit", "C");
-        getHourlyForecastData(59.609901, 16.544809, "80948121ac889b120dca64a6c7e5f24c", unitType, selectedDay);
+        renderAll();
     });
 
     fahrenheitBtn.addEventListener("click", function () {
         currentUnit = "F";
+        unitType = "imperial";
         fahrenheitBtn.classList.add("active");
         celsiusBtn.classList.remove("active");
-        showWeather(activeIndex);
-        let unitType = "imperial";
         localStorage.setItem("currentUnit", "F");
-        getHourlyForecastData(59.609901, 16.544809, "80948121ac889b120dca64a6c7e5f24c", unitType, selectedDay);
+        renderAll();
     });
+
+    menuBtn.addEventListener("click", function () {
+        if (toggle===1){
+            toggle = 0;
+            menuList.classList.remove("activeMenu");
+        } else {
+            toggle = 1;
+            menuList.classList.add("activeMenu");
+        }
+        
+    });
+
+    function renderAll() {
+        currentLocation = JSON.parse(localStorage.getItem("weatherCity")) || [];
+        cities = JSON.parse(localStorage.getItem("cities")) || [];
+        getHourlyForecastData(currentLocation.lat, currentLocation.lon, "80948121ac889b120dca64a6c7e5f24c", unitType, selectedDay);
+        renderCityList(cities, prevHistory);
+        fetchWeather(currentLocation.lat, currentLocation.lon);
+        showWeather(activeIndex);
+    }
 
     generateTenDaysFromMonday();
     renderDays();
     showWeather(0);
-    getHourlyForecastData(59.609901, 16.544809, "80948121ac889b120dca64a6c7e5f24c", unitType, selectedDay)
+    getHourlyForecastData(currentLocation.lat, currentLocation.lon, "80948121ac889b120dca64a6c7e5f24c", unitType, selectedDay);
+    renderCityList(cities, prevHistory);
 
     const savedCity = JSON.parse(localStorage.getItem("weatherCity"));
 
@@ -121,46 +187,53 @@ document.addEventListener("DOMContentLoaded", function () {
              document.getElementById("city").textContent = savedCity.name;
             fetchWeather(savedCity.lat, savedCity.lon);
 }
-});
 
-//selectCity section
+    //selectCity section
 
-const city = document.getElementById("city");
-const locationOn = document.getElementById("location-on");
+    const city = document.getElementById("city");
+    const locationOn = document.getElementById("location-on");
 
-city.addEventListener("click", openSearchModal);
+    city.addEventListener("click", () => {
+        openSearchModal();
+        renderAll(); //trying to render all features again after a city has been selected
+    });
 
-const mapContainer = document.getElementById("map-container");
+    const mapContainer = document.getElementById("map-container");
 
-let map;
+    let map;
 
-locationOn.addEventListener("click", () => {
+    locationOn.addEventListener("click", () => {
 
-    mapContainer.style.display = "block";
+        mapContainer.style.display = "block";
 
-    if(!map){
+        if(!map){
 
-        map = L.map('map').setView([51.505, -0.09], 5);
+            map = L.map('map').setView([51.505, -0.09], 5);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap'
-        }).addTo(map);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
 
-        map.on("click", function(e){
+            map.on("click", function(e){
 
-            const lat = e.latlng.lat;
-            const lon = e.latlng.lng;
+                const lat = e.latlng.lat;
+                const lon = e.latlng.lng;
 
                 localStorage.setItem(
-        "weatherCity",
-        JSON.stringify({
-            name: "Selected location",
-            lat: lat,
-            lon: lon
-        })
-    );
-            fetchWeather(lat, lon);
-            mapContainer.style.display = "none";
-        });
-    }
+                    "weatherCity",
+                    JSON.stringify({
+                        name: "Selected location", //Invalid City name, needs to be the actual city name for it to used by others
+                        lat: lat,
+                        lon: lon
+                    })
+                );
+                saveCity("new City", lat, lon);
+                //fetchWeather(lat, lon); removed and replaced by an all function for rendering
+                renderAll();
+                mapContainer.style.display = "none";
+            });
+        }
+    });
+
 });
+
