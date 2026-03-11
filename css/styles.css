@@ -226,3 +226,23 @@ button.active {
     background: #1f1f1f;
     color: white;
 }
+#days-list {
+    max-height: 220px;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+#days-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    max-height: 200px;
+    overflow: hidden;
+
+    transition: max-height 0.3s ease;
+}
+
+#days-list.expanded {
+    max-height: 1000px;
+}
