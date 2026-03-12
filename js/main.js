@@ -11,7 +11,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const selectedDayEl = document.getElementById("selected-day");
     const weatherIconEl = document.getElementById("weather-icon");
     const prevHistory = document.querySelector("#prevCitiesList");
-    const popCitiesList = document.querySelector("#popCitiesList");
 
     const celsiusBtn = document.getElementById("celsiusBtn");
     const fahrenheitBtn = document.getElementById("fahrenheitBtn");
@@ -23,17 +22,19 @@ document.addEventListener("DOMContentLoaded", function () {
     let activeIndex = 0;
     let toggle = 0;
 
-    let currentLocation = JSON.parse(localStorage.getItem("weatherCity")) || [];
-
     const weekDays = ["Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag", "Söndag"];
     const fakeWeather = [];
     const popularCitiesArr = [
-        {"name": "London", "lon": 0, "lat": 0},
-        {"name": "Paris", "lon": 0, "lat": 0},
-        {"name": "Stockholm", "lon": 18.0686, "lat": 59.3293}
+        { "name": "London", "lon": -0.1276, "lat": 51.5072 },
+        { "name": "Paris", "lon": 2.3514, "lat": 48.8575 },
+        { "name": "Stockholm", "lon": 18.0686, "lat": 59.3293 }
     ];
     localStorage.setItem("popCityString", JSON.stringify(popularCitiesArr));
     let cities = JSON.parse(localStorage.getItem("cities")) || [];
+    let currentLocation = JSON.parse(localStorage.getItem("weatherCity"));
+    if (currentLocation === null) {
+        currentLocation = popularCitiesArr[0];
+    }
 
     // ===== GENERATE DAYS =====
     function generateTenDaysFromMonday() {
@@ -280,15 +281,13 @@ document.addEventListener("DOMContentLoaded", function () {
     getHourlyForecastData(currentLocation.lat, currentLocation.lon, "80948121ac889b120dca64a6c7e5f24c", unitType);
     renderCityList(cities, prevHistory);
 
-    const savedCity = JSON.parse(localStorage.getItem("weatherCity"));
+    if (currentLocation) {
 
-    if (savedCity) {
+        document.getElementById("city").textContent = currentLocation.name;
 
-        document.getElementById("city").textContent = savedCity.name;
+        fetchWeather(currentLocation.lat, currentLocation.lon, unitType);
 
-        fetchWeather(savedCity.lat, savedCity.lon, unitType);
-
-        loadDailyWeather(savedCity.lat, savedCity.lon);
+        loadDailyWeather(currentLocation.lat, currentLocation.lon);
 
     }
 
