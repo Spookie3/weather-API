@@ -253,3 +253,14 @@ button.active {
 #arrow-down.rotate svg {
     transform: rotate(180deg);
 }
+.day-temp{
+    display:block;
+    font-size:14px;
+    margin-top:4px;
+    color:#444;
+}
+.day-icon{
+width:28px;
+height:28px;
+margin-top:4px;
+}
