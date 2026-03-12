@@ -246,3 +246,21 @@ button.active {
 #days-list.expanded {
     max-height: 1000px;
 }
+#arrow-down svg {
+    transition: transform 0.3s ease;
+}
+
+#arrow-down.rotate svg {
+    transform: rotate(180deg);
+}
+.day-temp{
+    display:block;
+    font-size:14px;
+    margin-top:4px;
+    color:#444;
+}
+.day-icon{
+width:28px;
+height:28px;
+margin-top:4px;
+}
