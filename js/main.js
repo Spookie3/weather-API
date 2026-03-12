@@ -258,13 +258,14 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // ===== SHOW MORE DAYS BUTTON =====
-    const arrow = document.getElementById("arrow-down");
+ const arrow = document.getElementById("arrow-down");
 
-    arrow.addEventListener("click", () => {
+arrow.addEventListener("click", () => {
 
-        daysList.classList.toggle("expanded");
+    daysList.classList.toggle("expanded");
+    arrow.classList.toggle("rotate");
 
-    });
+});
 
     // ===== INITIAL LOAD =====
     function renderAll() {

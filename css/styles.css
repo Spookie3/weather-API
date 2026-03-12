@@ -246,3 +246,10 @@ button.active {
 #days-list.expanded {
     max-height: 1000px;
 }
+#arrow-down svg {
+    transition: transform 0.3s ease;
+}
+
+#arrow-down.rotate svg {
+    transform: rotate(180deg);
+}
