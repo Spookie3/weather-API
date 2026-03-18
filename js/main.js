@@ -5,22 +5,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const daysList = document.getElementById("days-list");
     const temperatureEl = document.getElementById("temperature");
-    const sunriseEl = document.getElementById("sunrise");
-    const sunsetEl = document.getElementById("sunset");
-    const precipitationEl = document.getElementById("precipitation");
     const selectedDayEl = document.getElementById("selected-day");
     const weatherIconEl = document.getElementById("weather-icon");
+
     const prevHistory = document.querySelector("#prevCitiesList");
 
     const celsiusBtn = document.getElementById("celsiusBtn");
     const fahrenheitBtn = document.getElementById("fahrenheitBtn");
+
     const menuBtn = document.getElementById("menuIcon");
     const menuList = document.getElementById("menuList");
+
+    const city = document.getElementById("city");
+    const locationOn = document.getElementById("location-on");
+    const mapContainer = document.getElementById("map-container");
+
+    let map;
+    let toggle = 0;
 
     let currentUnit = "C";
     let unitType = "metric";
     let activeIndex = 0;
-    let toggle = 0;
 
     let dailyTemps = [];
 
@@ -59,7 +64,6 @@ document.addEventListener("DOMContentLoaded", function () {
         localStorage.setItem("weatherDates", JSON.stringify(fakeWeather));
     }
 
-    // ===== RENDER DAYS =====
     function renderDays() {
 
         daysList.innerHTML = "";
@@ -81,7 +85,7 @@ document.addEventListener("DOMContentLoaded", function () {
             div.addEventListener("click", function () {
 
                 document.querySelectorAll(".day-item")
-                    .forEach(d => d.classList.remove("active"));
+                .forEach(d => d.classList.remove("active"));
 
                 div.classList.add("active");
 
@@ -99,54 +103,40 @@ document.addEventListener("DOMContentLoaded", function () {
 
     }
 
-    // ===== SHOW WEATHER =====
-    function showWeather(index) {
+    function showWeather(index){
 
         const data = fakeWeather[index];
 
         selectedDayEl.textContent = data.day + " - " + data.date;
 
-        if (dailyTemps[index]) {
+        if(dailyTemps[index]){
 
             const temp = Math.round(dailyTemps[index].temp);
-            updateTemperature(temp);
+
+            temperatureEl.textContent = temp + "°C";
 
             weatherIconEl.innerHTML =
             `<img src="https://openweathermap.org/img/wn/${dailyTemps[index].icon}@2x.png">`;
 
         } else {
-
-            temperatureEl.textContent = "--";
-
-        }
-
-    }
-
-    // ===== TEMPERATURE CONVERSION =====
-    function updateTemperature(tempC) {
-
-        if (currentUnit === "C") {
-
-            temperatureEl.textContent = tempC + "°C";
-
-        } else {
-
-            const tempF = (tempC * 9/5) + 32;
+            /* vad gör den här delen?
+            const tempF = (temp * 9/5) + 32;
             temperatureEl.textContent = Math.round(tempF) + "°F";
-
+            */
         }
 
     }
 
-    
-    //Renders all cities in a specific div based on the provided array and element ID
-    function renderCityList(cityString, divId) {
+    function renderCityList(cityString, divId){
+
         divId.innerHTML = "";
+
         for(let i = 0; i < cityString.length; i++){
-            divId.innerHTML += `
-                <span class="city">${cityString[i].name}</span>               
-            `;
+
+            divId.innerHTML += `<span class="city">${cityString[i].name}</span>`;
+
         }
+
     }
 
     //Updates the current city selected in local storage.
@@ -210,14 +200,14 @@ document.addEventListener("DOMContentLoaded", function () {
         const apiKey = "80948121ac889b120dca64a6c7e5f24c";
 
         const response = await fetch(
-            `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=${unitType}&appid=${apiKey}`
+        `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=${unitType}&appid=${apiKey}`
         );
 
         const data = await response.json();
 
         dailyTemps = [];
 
-        for (let i = 0; i < data.list.length; i += 8) {
+        for(let i = 0; i < data.list.length; i += 8){
 
             dailyTemps.push({
                 temp: data.list[i].main.temp,
@@ -262,7 +252,30 @@ document.addEventListener("DOMContentLoaded", function () {
 
     }
 
-    // ===== SHOW MORE DAYS BUTTON =====
+    async function updateWeatherForLocation(lat, lon, name){
+
+        document.getElementById("city").textContent = name;
+
+        activeIndex = 0;
+        localStorage.setItem("day",0);
+
+        await fetchWeather(lat, lon, unitType);
+
+        await loadDailyWeather(lat, lon, unitType);
+
+        getHourlyForecastData(
+            lat,
+            lon,
+            "80948121ac889b120dca64a6c7e5f24c",
+            unitType
+        );
+
+        showWeather(0);
+
+    }
+
+    window.updateWeatherForLocation = updateWeatherForLocation;
+
     const arrow = document.getElementById("arrow-down");
 
     arrow.addEventListener("click", () => {
@@ -286,32 +299,19 @@ document.addEventListener("DOMContentLoaded", function () {
     generateNextTenDays();
     renderDays();
     showWeather(0);
-    getHourlyForecastData(currentLocation.lat, currentLocation.lon, "80948121ac889b120dca64a6c7e5f24c", unitType);
+
     renderCityList(cities, prevHistory);
 
     if (currentLocation) {
 
-        document.getElementById("city").textContent = currentLocation.name;
-
-        fetchWeather(currentLocation.lat, currentLocation.lon, unitType);
-
-        loadDailyWeather(currentLocation.lat, currentLocation.lon, unitType);
+        updateWeatherForLocation(currentLocation.lat, currentLocation.lon, currentLocation.name);
 
     }
-
-    // ===== CITY SELECT =====
-
-    const city = document.getElementById("city");
-    const locationOn = document.getElementById("location-on");
 
     city.addEventListener("click", async() => {     //to prevent renderall() to act first
         await openSearchModal();
         renderAll(); 
     });
-
-    const mapContainer = document.getElementById("map-container");
-
-    let map;
 
     locationOn.addEventListener("click", () => {
 
@@ -322,30 +322,31 @@ document.addEventListener("DOMContentLoaded", function () {
             map = L.map('map').setView([51.505, -0.09], 5);
 
             L.tileLayer(
-                'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                { attribution: '© OpenStreetMap' }
+            'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            { attribution: '© OpenStreetMap' }
             ).addTo(map);
 
-            map.on("click", function (e) {
+            map.on("click", async function(e){
 
                 const lat = e.latlng.lat;
                 const lon = e.latlng.lng;
 
-                localStorage.setItem(
-                    "weatherCity",
-                    JSON.stringify({
-                        name: "Selected location", //Invalid City name, needs to be the actual city name for it to used by others
-                        lat: lat,
-                        lon: lon
-                    })
-                );
-                saveCity("new City", lat, lon);
-                renderAll();
-                activeIndex = 0;
-                showWeather(0);
-                mapContainer.style.display = "none";
-            });
-        }
-    });
-});
+                const newCity = {
+                    name:"Selected location",
+                    lat:lat,
+                    lon:lon
+                };
 
+                localStorage.setItem("weatherCity", JSON.stringify(newCity));
+                renderAll();
+                await updateWeatherForLocation(lat, lon, newCity.name);
+
+                mapContainer.style.display = "none";
+
+            });
+
+        }
+
+    });
+
+});
