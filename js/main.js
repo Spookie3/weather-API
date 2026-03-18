@@ -27,15 +27,19 @@ document.addEventListener("DOMContentLoaded", function () {
     let unitType = "metric";
     let activeIndex = 0;
 
-    let dailyTemps = [];
-
-    localStorage.setItem("day", 0);
-    let selectedDay = Number(localStorage.getItem("day")) * 24;
-
-    const weekDays = ["Måndag","Tisdag","Onsdag","Torsdag","Fredag","Lördag","Söndag"];
+    const weekDays = ["Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag", "Söndag"];
     const fakeWeather = [];
-
+    const popularCitiesArr = [
+        { "name": "London", "lon": -0.1276, "lat": 51.5072 },
+        { "name": "Paris", "lon": 2.3514, "lat": 48.8575 },
+        { "name": "Stockholm", "lon": 18.0686, "lat": 59.3293 }
+    ];
+    localStorage.setItem("popCityString", JSON.stringify(popularCitiesArr));
     let cities = JSON.parse(localStorage.getItem("cities")) || [];
+    let currentLocation = JSON.parse(localStorage.getItem("weatherCity"));
+    if (currentLocation === null) {
+        currentLocation = popularCitiesArr[0];
+    }
 
     function generateNextTenDays() {
 
@@ -226,11 +230,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     renderCityList(cities, prevHistory);
 
-    const savedCity = JSON.parse(localStorage.getItem("weatherCity"));
+    if (currentLocation) {
 
-    if(savedCity){
-
-        updateWeatherForLocation(savedCity.lat, savedCity.lon, savedCity.name);
+        updateWeatherForLocation(currentLocation.lat, currentLocation.lon, currentLocation.name);
 
     }
 

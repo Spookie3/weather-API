@@ -48,6 +48,7 @@ nav {
 .city {
     margin: .25rem;
     padding: .25rem;
+    cursor: pointer;
 }
 
 #prevCitiesList {
