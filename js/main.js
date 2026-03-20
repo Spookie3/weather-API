@@ -127,14 +127,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
     }
 
-    function renderCityList(cityString, divId){
-
-        divId.innerHTML = "";
-
+    
+    //Renders all cities in a specific div based on the provided array and element ID
+    function renderCityList(cityString, divId) {
+        divId.textContent = "";
         for(let i = 0; i < cityString.length; i++){
-
-            divId.innerHTML += `<span class="city">${cityString[i].name}</span>`;
-
+            const span = document.createElement("span");
+            span.classList.add("city");
+            span.textContent = cityString[i].name;
+            divId.appendChild(span);
         }
 
     }
@@ -162,7 +163,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // ===== UNIT SWITCH =====
+    // ===== UNIT SWITCH ===== 
+    // Changes variables for the current unit to celsius
     celsiusBtn.addEventListener("click", function () {
 
         currentUnit = "C";
@@ -173,6 +175,7 @@ document.addEventListener("DOMContentLoaded", function () {
         renderAll();
     });
 
+    // Changes variables for the current unit to farenheit
     fahrenheitBtn.addEventListener("click", function () {
 
         currentUnit = "F";
@@ -183,6 +186,7 @@ document.addEventListener("DOMContentLoaded", function () {
         renderAll();
     });
   
+    // Opens and closes the menu
     menuBtn.addEventListener("click", function () {
         if (toggle===1){
             toggle = 0;
@@ -308,11 +312,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
     }
 
+    // ===== CITY SELECT =====
+
+    // GET UI elements
+    const city = document.getElementById("city");
+    const locationOn = document.getElementById("location-on");
+
     city.addEventListener("click", async() => {     //to prevent renderall() to act first
         await openSearchModal();
         renderAll(); 
     });
 
+    const mapContainer = document.getElementById("map-container");
+
+    let map;
+
+    // When clicking location icon > open map
     locationOn.addEventListener("click", () => {
 
         mapContainer.style.display = "block";
@@ -336,8 +351,14 @@ document.addEventListener("DOMContentLoaded", function () {
                     lat:lat,
                     lon:lon
                 };
+                localStorage.setItem(
+                    "weatherCity",
+                    JSON.stringify(newCity)
+                );
+                // Save to history
+                saveCity("new City", lat, lon);
 
-                localStorage.setItem("weatherCity", JSON.stringify(newCity));
+                // Update UI
                 renderAll();
                 await updateWeatherForLocation(lat, lon, newCity.name);
 

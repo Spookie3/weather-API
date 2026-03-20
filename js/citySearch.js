@@ -1,15 +1,20 @@
+//Get city element from UI
+const cityElement = document.getElementById("city");
+
+//Load saved cities from localStorage or initalize emty array
 let cities = JSON.parse(localStorage.getItem("cities")) || [];
 
-export function openSearchModal(){
-
+//Search for a City
+export async function openSearchModal(){
     const cityName = prompt("Enter city name");
 
     if(!cityName) return;
 
-    fetchCoordinates(cityName);
-
+    // Wait for coordinated before continuing
+    await fetchCoordinates(cityName);
 }
 
+// Fetch latitude & longitude using OpenWeather Geocoding API
 async function fetchCoordinates(cityName){
 
     const API_KEY ="d7d5e9ce027464d47b22372e72cc2b23";
@@ -29,7 +34,8 @@ async function fetchCoordinates(cityName){
     const lat = data[0].lat;
     const lon = data[0].lon;
 
-    const cityObj = {
+    // Save selected city to localStorage (used on reload)
+    localStorage.setItem("weatherCity", JSON.stringify({
         name: cityName,
         lat: lat,
         lon: lon
@@ -37,6 +43,7 @@ async function fetchCoordinates(cityName){
 
     localStorage.setItem("weatherCity", JSON.stringify(cityObj));
 
+    // Save to history list
     saveCity(cityName, lat, lon);
 
     if(window.updateWeatherForLocation){
@@ -47,6 +54,7 @@ async function fetchCoordinates(cityName){
 
 }
 
+// Saves city to history if it doesn't already exist
 export function saveCity(cityName, lat, lon){
 
     if(!cities.find((cityObj) => cityObj.name === cityName)){
@@ -63,6 +71,7 @@ export function saveCity(cityName, lat, lon){
 
 }
 
+// Fetch current weather from Openweather API
 export async function fetchWeather(lat, lon, unitType){
 
     const API_KEY = "d7d5e9ce027464d47b22372e72cc2b23";
@@ -76,11 +85,13 @@ export async function fetchWeather(lat, lon, unitType){
 
 }
 
+// Updates UI with city name and temperature
 function updateUI(data, unitType){
 
     const cityElement = document.getElementById("city");
     const tempElement = document.getElementById("current-temp");
 
+    // Update city name
     cityElement.textContent = data.name;
 
     const unit = unitType === "metric" ? "°C" : "°F";
