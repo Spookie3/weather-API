@@ -5,22 +5,29 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const daysList = document.getElementById("days-list");
     const temperatureEl = document.getElementById("temperature");
-    const sunriseEl = document.getElementById("sunrise");
-    const sunsetEl = document.getElementById("sunset");
-    const precipitationEl = document.getElementById("precipitation");
     const selectedDayEl = document.getElementById("selected-day");
     const weatherIconEl = document.getElementById("weather-icon");
+
     const prevHistory = document.querySelector("#prevCitiesList");
 
     const celsiusBtn = document.getElementById("celsiusBtn");
     const fahrenheitBtn = document.getElementById("fahrenheitBtn");
+
     const menuBtn = document.getElementById("menuIcon");
     const menuList = document.getElementById("menuList");
+
+    const city = document.getElementById("city");
+    const locationOn = document.getElementById("location-on");
+    const mapContainer = document.getElementById("map-container");
+
+    let map;
+    let toggle = 0;
 
     let currentUnit = "C";
     let unitType = "metric";
     let activeIndex = 0;
-    let toggle = 0;
+
+    let dailyTemps = [];
 
     const weekDays = ["Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag", "Söndag"];
     const fakeWeather = [];
@@ -37,37 +44,26 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // ===== GENERATE DAYS =====
-    function generateTenDaysFromMonday() {
+    function generateNextTenDays() {
 
         const today = new Date();
-        const dayIndex = today.getDay();
-        const mondayOffset = dayIndex === 0 ? -6 : 1 - dayIndex;
-
-        const monday = new Date(today);
-        monday.setDate(today.getDate() + mondayOffset);
+        fakeWeather.length = 0;
 
         for (let i = 0; i < 10; i++) {
 
-            const date = new Date(monday);
-            date.setDate(monday.getDate() + i);
+            const date = new Date(today);
+            date.setDate(today.getDate() + i);
 
             fakeWeather.push({
                 day: weekDays[date.getDay() === 0 ? 6 : date.getDay() - 1],
-                date: date.toLocaleDateString("sv-SE", { day: "numeric", month: "short" }),
-                tempC: Math.floor(Math.random() * 15) + 5,
-                sunrise: "06:" + (30 + i),
-                sunset: "17:" + (40 + i),
-                precipitation: Math.floor(Math.random() * 10) + " mm",
-                icon: "☀️"
+                date: date.toLocaleDateString("sv-SE", { day: "numeric", month: "short" })
             });
 
         }
 
         localStorage.setItem("weatherDates", JSON.stringify(fakeWeather));
-
     }
 
-    // ===== RENDER DAYS =====
     function renderDays() {
 
         daysList.innerHTML = "";
@@ -82,12 +78,14 @@ document.addEventListener("DOMContentLoaded", function () {
             div.innerHTML = `
                 <strong>${data.day}</strong>
                 <span>${data.date}</span>
+                <img class="day-icon" src="" alt="">
+                <span class="day-temp">--</span>
             `;
 
             div.addEventListener("click", function () {
 
                 document.querySelectorAll(".day-item")
-                    .forEach(d => d.classList.remove("active"));
+                .forEach(d => d.classList.remove("active"));
 
                 div.classList.add("active");
 
@@ -105,35 +103,26 @@ document.addEventListener("DOMContentLoaded", function () {
 
     }
 
-    // ===== SHOW WEATHER =====
-    function showWeather(index) {
+    function showWeather(index){
 
         const data = fakeWeather[index];
 
         selectedDayEl.textContent = data.day + " - " + data.date;
 
-        updateTemperature(data.tempC);
+        if(dailyTemps[index]){
 
-        sunriseEl.textContent = "Soluppgång: " + data.sunrise;
-        sunsetEl.textContent = "Solnedgång: " + data.sunset;
-        precipitationEl.textContent = "Nederbörd: " + data.precipitation;
-        weatherIconEl.textContent = data.icon;
+            const temp = Math.round(dailyTemps[index].temp);
 
-    }
+            temperatureEl.textContent = temp + "°C";
 
-    // ===== TEMPERATURE CONVERSION =====
-    function updateTemperature(tempC) {
-
-        if (currentUnit === "C") {
-
-            temperatureEl.textContent = tempC + "°C";
+            weatherIconEl.innerHTML =
+            `<img src="https://openweathermap.org/img/wn/${dailyTemps[index].icon}@2x.png">`;
 
         } else {
-
-            const tempF = (tempC * 9/5) + 32;
-
+            /* vad gör den här delen?
+            const tempF = (temp * 9/5) + 32;
             temperatureEl.textContent = Math.round(tempF) + "°F";
-
+            */
         }
 
     }
@@ -148,6 +137,7 @@ document.addEventListener("DOMContentLoaded", function () {
             span.textContent = cityString[i].name;
             divId.appendChild(span);
         }
+
     }
 
     //Updates the current city selected in local storage.
@@ -169,7 +159,6 @@ document.addEventListener("DOMContentLoaded", function () {
         
         if(clickedCity) {
             localStorage.setItem("weatherCity", JSON.stringify(clickedCity));
-            //update all render functions relying on weatherCity  
             renderAll();
         }
     });
@@ -210,19 +199,19 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // ===== FETCH DAILY WEATHER FROM OPENWEATHER =====
-    async function loadDailyWeather(lat, lon) {
+    async function loadDailyWeather(lat, lon, unitType) {
 
         const apiKey = "80948121ac889b120dca64a6c7e5f24c";
 
         const response = await fetch(
-            `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=${unitType}&appid=${apiKey}`
+        `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=${unitType}&appid=${apiKey}`
         );
 
         const data = await response.json();
 
-        const dailyTemps = [];
+        dailyTemps = [];
 
-        for (let i = 0; i < data.list.length; i += 8) {
+        for(let i = 0; i < data.list.length; i += 8){
 
             dailyTemps.push({
                 temp: data.list[i].main.temp,
@@ -231,28 +220,35 @@ document.addEventListener("DOMContentLoaded", function () {
 
         }
 
-        localStorage.setItem("dailyTemps", JSON.stringify(dailyTemps));
+        updateDailyUI();
 
-        updateDailyUI(dailyTemps);
+        // 🔥 NYTT: uppdatera huvudkortet efter ny stad
+        showWeather(activeIndex);
 
     }
 
     // ===== UPDATE UI WITH DAILY TEMPS =====
-    function updateDailyUI(dailyTemps) {
+    function updateDailyUI() {
 
         const items = document.querySelectorAll(".day-item");
 
         items.forEach((item, index) => {
 
+            const tempSpan = item.querySelector(".day-temp");
+            const iconImg = item.querySelector(".day-icon");
+
             if (dailyTemps[index]) {
 
                 const temp = Math.round(dailyTemps[index].temp);
+                tempSpan.textContent = temp + "°";
 
-                const span = document.createElement("span");
+                iconImg.src =
+                `https://openweathermap.org/img/wn/${dailyTemps[index].icon}.png`;
 
-                span.textContent = temp + "°";
+            } else {
 
-                item.appendChild(span);
+                tempSpan.textContent = "--";
+                iconImg.src = "";
 
             }
 
@@ -260,12 +256,36 @@ document.addEventListener("DOMContentLoaded", function () {
 
     }
 
-    // ===== SHOW MORE DAYS BUTTON =====
+    async function updateWeatherForLocation(lat, lon, name){
+
+        document.getElementById("city").textContent = name;
+
+        activeIndex = 0;
+        localStorage.setItem("day",0);
+
+        await fetchWeather(lat, lon, unitType);
+
+        await loadDailyWeather(lat, lon, unitType);
+
+        getHourlyForecastData(
+            lat,
+            lon,
+            "80948121ac889b120dca64a6c7e5f24c",
+            unitType
+        );
+
+        showWeather(0);
+
+    }
+
+    window.updateWeatherForLocation = updateWeatherForLocation;
+
     const arrow = document.getElementById("arrow-down");
 
     arrow.addEventListener("click", () => {
 
         daysList.classList.toggle("expanded");
+        arrow.classList.toggle("rotate");
 
     });
 
@@ -277,21 +297,18 @@ document.addEventListener("DOMContentLoaded", function () {
         renderCityList(cities, prevHistory);
         fetchWeather(currentLocation.lat, currentLocation.lon, unitType);
         showWeather(activeIndex);
+        loadDailyWeather(currentLocation.lat, currentLocation.lon, unitType);
     }
   
-    generateTenDaysFromMonday();
+    generateNextTenDays();
     renderDays();
     showWeather(0);
-    getHourlyForecastData(currentLocation.lat, currentLocation.lon, "80948121ac889b120dca64a6c7e5f24c", unitType);
+
     renderCityList(cities, prevHistory);
 
     if (currentLocation) {
 
-        document.getElementById("city").textContent = currentLocation.name;
-
-        fetchWeather(currentLocation.lat, currentLocation.lon, unitType);
-
-        loadDailyWeather(currentLocation.lat, currentLocation.lon);
+        updateWeatherForLocation(currentLocation.lat, currentLocation.lon, currentLocation.name);
 
     }
 
@@ -320,31 +337,37 @@ document.addEventListener("DOMContentLoaded", function () {
             map = L.map('map').setView([51.505, -0.09], 5);
 
             L.tileLayer(
-                'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                { attribution: '© OpenStreetMap' }
+            'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            { attribution: '© OpenStreetMap' }
             ).addTo(map);
 
-            map.on("click", function (e) {
+            map.on("click", async function(e){
 
                 const lat = e.latlng.lat;
                 const lon = e.latlng.lng;
 
+                const newCity = {
+                    name:"Selected location",
+                    lat:lat,
+                    lon:lon
+                };
                 localStorage.setItem(
                     "weatherCity",
-                    JSON.stringify({
-                        name: "Selected location",
-                        lat: lat,
-                        lon: lon
-                    })
+                    JSON.stringify(newCity)
                 );
                 // Save to history
                 saveCity("new City", lat, lon);
 
                 // Update UI
                 renderAll();
-                mapContainer.style.display = "none";
-            });
-        }
-    });
-});
+                await updateWeatherForLocation(lat, lon, newCity.name);
 
+                mapContainer.style.display = "none";
+
+            });
+
+        }
+
+    });
+
+});
