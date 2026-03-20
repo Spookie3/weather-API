@@ -174,7 +174,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // ===== UNIT SWITCH =====
+    // ===== UNIT SWITCH ===== 
+    // Changes variables for the current unit to celsius
     celsiusBtn.addEventListener("click", function () {
 
         currentUnit = "C";
@@ -185,6 +186,7 @@ document.addEventListener("DOMContentLoaded", function () {
         renderAll();
     });
 
+    // Changes variables for the current unit to farenheit
     fahrenheitBtn.addEventListener("click", function () {
 
         currentUnit = "F";
@@ -195,6 +197,7 @@ document.addEventListener("DOMContentLoaded", function () {
         renderAll();
     });
   
+    // Opens and closes the menu
     menuBtn.addEventListener("click", function () {
         if (toggle===1){
             toggle = 0;
@@ -294,18 +297,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // ===== CITY SELECT =====
 
+    // GET UI elements
     const city = document.getElementById("city");
     const locationOn = document.getElementById("location-on");
 
     city.addEventListener("click", async() => {     //to prevent renderall() to act first
         await openSearchModal();
-        renderAll(); //trying to render all features again after a city has been selected
+        renderAll(); 
     });
 
     const mapContainer = document.getElementById("map-container");
 
     let map;
 
+    // When clicking location icon > open map
     locationOn.addEventListener("click", () => {
 
         mapContainer.style.display = "block";
@@ -327,13 +332,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 localStorage.setItem(
                     "weatherCity",
                     JSON.stringify({
-                        name: "Selected location", //Invalid City name, needs to be the actual city name for it to used by others
+                        name: "Selected location",
                         lat: lat,
                         lon: lon
                     })
                 );
+                // Save to history
                 saveCity("new City", lat, lon);
-                //fetchWeather(lat, lon); removed and replaced by an all function for rendering
+
+                // Update UI
                 renderAll();
                 mapContainer.style.display = "none";
             });

@@ -1,3 +1,4 @@
+// Creates a a card containing the time, type of weather and temperature. Uses parameters for latitude, longitude, API Key and unit for the temperature.
 export async function getHourlyForecastData(lat, lon, API_key, tempSelector) {
     let forecast_API = `https://pro.openweathermap.org/data/2.5/forecast/hourly?lat=${lat}&lon=${lon}&appid=${API_key}&units=${tempSelector}`;
     let hourlyCards = document.getElementById("hourlyForecast");
