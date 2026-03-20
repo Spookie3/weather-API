@@ -23,7 +23,11 @@ document.addEventListener("DOMContentLoaded", function () {
     let map;
     let toggle = 0;
 
-    let currentUnit = localStorage.getItem("currentUnit") || "C";
+    let currentUnit = localStorage.getItem("currentUnit");
+    if (currentUnit === null) {
+        currentUnit = "C";
+        localStorage.setItem("currentUnit", currentUnit);
+    }
     let unitType = localStorage.getItem("unitType") || "metric";
     let activeIndex = 0;
 
@@ -32,16 +36,16 @@ document.addEventListener("DOMContentLoaded", function () {
     const weekDays = ["Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag", "Söndag"];
     const fakeWeather = [];
     const popularCitiesArr = [
-        { "name": "London", "lon": -0.1276, "lat": 51.5072 },
-        { "name": "Paris", "lon": 2.3514, "lat": 48.8575 },
-        { "name": "Stockholm", "lon": 18.0686, "lat": 59.3293 }
+        { "name": "London", "lat": 51.5072, "lon": -0.1276 },
+        { "name": "Paris", "lat": 48.8575, "lon": 2.3514 },
+        { "name": "Stockholm", "lat": 59.3293, "lon": 18.0686 }
     ];
     localStorage.setItem("popCityString", JSON.stringify(popularCitiesArr));
     let cities = JSON.parse(localStorage.getItem("cities")) || [];
     let currentLocation = JSON.parse(localStorage.getItem("weatherCity"));
     if (currentLocation === null) {
         currentLocation = popularCitiesArr[0];
-        console.log("current is null");
+        localStorage.setItem("weatherCity", JSON.stringify(currentLocation));
     }
 
     // ===== GENERATE DAYS =====
