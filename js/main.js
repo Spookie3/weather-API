@@ -141,11 +141,12 @@ document.addEventListener("DOMContentLoaded", function () {
     
     //Renders all cities in a specific div based on the provided array and element ID
     function renderCityList(cityString, divId) {
-        divId.innerHTML = "";
+        divId.textContent = "";
         for(let i = 0; i < cityString.length; i++){
-            divId.innerHTML += `
-                <span class="city">${cityString[i].name}</span>               
-            `;
+            const span = document.createElement("span");
+            span.classList.add("city");
+            span.textContent = cityString[i].name;
+            divId.appendChild(span);
         }
     }
 
