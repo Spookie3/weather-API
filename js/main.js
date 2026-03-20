@@ -23,8 +23,8 @@ document.addEventListener("DOMContentLoaded", function () {
     let map;
     let toggle = 0;
 
-    let currentUnit = "C";
-    let unitType = "metric";
+    let currentUnit = localStorage.getItem("currentUnit") || "C";
+    let unitType = localStorage.getItem("unitType") || "metric";
     let activeIndex = 0;
 
     let dailyTemps = [];
@@ -41,6 +41,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let currentLocation = JSON.parse(localStorage.getItem("weatherCity"));
     if (currentLocation === null) {
         currentLocation = popularCitiesArr[0];
+        console.log("current is null");
     }
 
     // ===== GENERATE DAYS =====
@@ -106,25 +107,20 @@ document.addEventListener("DOMContentLoaded", function () {
     function showWeather(index){
 
         const data = fakeWeather[index];
+        let temp = 0;
 
         selectedDayEl.textContent = data.day + " - " + data.date;
 
         if(dailyTemps[index]){
 
-            const temp = Math.round(dailyTemps[index].temp);
+            temp = Math.round(dailyTemps[index].temp);
 
-            temperatureEl.textContent = temp + "°C";
+            temperatureEl.textContent = temp + "°" + currentUnit;
 
             weatherIconEl.innerHTML =
             `<img src="https://openweathermap.org/img/wn/${dailyTemps[index].icon}@2x.png">`;
 
-        } else {
-            /* vad gör den här delen?
-            const tempF = (temp * 9/5) + 32;
-            temperatureEl.textContent = Math.round(tempF) + "°F";
-            */
         }
-
     }
 
     
@@ -172,6 +168,7 @@ document.addEventListener("DOMContentLoaded", function () {
         celsiusBtn.classList.add("active");
         fahrenheitBtn.classList.remove("active");
         localStorage.setItem("currentUnit", "C");
+        localStorage.setItem("unitType", unitType); 
         renderAll();
     });
 
@@ -183,9 +180,21 @@ document.addEventListener("DOMContentLoaded", function () {
         fahrenheitBtn.classList.add("active");
         celsiusBtn.classList.remove("active");
         localStorage.setItem("currentUnit", "F");
+        localStorage.setItem("unitType", unitType);
         renderAll();
     });
-  
+
+    // Allows you to keep the selected temperature on refresh
+    function activeTempUnit() {
+        if(currentUnit === "C") {
+            celsiusBtn.classList.add("active");
+            fahrenheitBtn.classList.remove("active");
+        } else {
+            fahrenheitBtn.classList.add("active");
+            celsiusBtn.classList.remove("active");
+        }
+    }
+    
     // Opens and closes the menu
     menuBtn.addEventListener("click", function () {
         if (toggle===1){
@@ -302,9 +311,10 @@ document.addEventListener("DOMContentLoaded", function () {
   
     generateNextTenDays();
     renderDays();
-    showWeather(0);
-
+    showWeather(activeIndex);
+    renderAll();
     renderCityList(cities, prevHistory);
+    activeTempUnit();
 
     if (currentLocation) {
 
@@ -315,17 +325,12 @@ document.addEventListener("DOMContentLoaded", function () {
     // ===== CITY SELECT =====
 
     // GET UI elements
-    const city = document.getElementById("city");
-    const locationOn = document.getElementById("location-on");
 
     city.addEventListener("click", async() => {     //to prevent renderall() to act first
         await openSearchModal();
         renderAll(); 
     });
 
-    const mapContainer = document.getElementById("map-container");
-
-    let map;
 
     // When clicking location icon > open map
     locationOn.addEventListener("click", () => {

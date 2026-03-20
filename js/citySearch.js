@@ -39,9 +39,7 @@ async function fetchCoordinates(cityName){
         name: cityName,
         lat: lat,
         lon: lon
-    };
-
-    localStorage.setItem("weatherCity", JSON.stringify(cityObj));
+    }));
 
     // Save to history list
     saveCity(cityName, lat, lon);
