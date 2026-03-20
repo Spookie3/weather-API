@@ -10,19 +10,24 @@ export async function getHourlyForecastData(lat, lon, API_key, tempSelector) {
         const weatherData = await response.json();
         const hourlyData = weatherData.list;
         const timeZone = weatherData.city.timezone;
-        hourlyCards.innerHTML = "";
+        hourlyCards.textContent = "";
         for(let i=0; i < 24; i++) {
             let unixTimeConvert = new Date((hourlyData[i].dt + timeZone) * 1000);
             let timeH = unixTimeConvert.getUTCHours().toString().padStart(2,0);
             let timeM = unixTimeConvert.getUTCMinutes().toString().padStart(2,0);
             let roundTemp = Math.floor(hourlyData[i].main.temp);
-            hourlyCards.innerHTML += `
-                <div class="forecast-card">
-                    <p>${timeH}:${timeM}</p>
-                    <img src="https://openweathermap.org/img/w/${hourlyData[i].weather[0].icon}.png" alt="current weather: ${hourlyData[i].weather.description}">
-                    <p>${roundTemp} &deg;${tempUnit}</p>
-                </div>
-            `;
+            const div = document.createElement("div");
+            const p1 = document.createElement("p");
+            const p2 = document.createElement("p");
+            const img = document.createElement("img");
+            div.classList.add("forecast-card");
+            p1.innerText = `${timeH}:${timeM}`;
+            p2.innerText = `${roundTemp} °${tempUnit}`;
+            img.src = `https://openweathermap.org/img/w/${hourlyData[i].weather[0].icon}.png`;
+            div.appendChild(p1);
+            div.appendChild(img);
+            div.appendChild(p2);
+            hourlyCards.appendChild(div);
         }
     } catch (error) {
         console.log(error);
